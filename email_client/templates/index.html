@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">PhishAI</div>
+            </div>
+            <div class="new-message">
+                <button class="btn btn-primary">New Message</button>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="#"><i class="material-icons">inbox</i><span>Inbox</span></a></li>
+                <li><a href="#"><i class="material-icons">send</i><span>Sent</span></a></li>
+                <li><a href="#"><i class="material-icons">drafts</i><span>Drafts</span></a></li>
+                <li><a href="#"><i class="material-icons">archive</i><span>Archive</span></a></li>
+                <li><a href="#"><i class="material-icons">report</i><span>Spam</span></a></li>
+                <li><a href="#"><i class="material-icons">phishing</i><span>Phishing</span></a></li>
+                <li><a href="#"><i class="material-icons">delete</i><span>Trash</span></a></li>
+            </ul>
+            <div class="sidebar-footer">
+            </div>
+        </aside>
+        <main class="main-content">
+            <header class="header">
+                <button class="back-button" style="display: none;"><i class="material-icons">arrow_back</i></button>
+                <div class="search-bar">
+                    <i class="material-icons">search</i>
+                    <input type="text" placeholder="Search">
+                </div>
+                <div class="user-menu">
+                    <a href="#" id="settings-btn"><i class="material-icons">settings</i></a>
+                    <a href="#"><i class="material-icons">account_circle</i></a>
+                </div>
+            </header>
+            <div class="email-list">
+                </div>
+            <div class="email-content" style="display: none;">
+                <div class="email-content-header">
+                    <h2 class="email-content-subject"></h2>
+                    <div class="email-content-sender"></div>
+                </div>
+                <div class="email-content-body"></div>
+            </div>
+            <div class="settings-view" style="display: none;">
+                <h2>Settings</h2>
+                <div class="setting-item">
+                    <label for="theme-toggler">Dark Mode</label>
+                    <input type="checkbox" id="theme-toggler">
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
