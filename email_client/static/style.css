@@ -10,6 +10,51 @@
     --email-item-hover-background: var(--sidebar-active-background);
     --text-color: #212121;
     --primary-color: #235ccf;
+    --scroll-bg: #2c2c2c;
+    --scroll-handle: #555;
+    --handle-hover: #777;
+}
+
+::-webkit-scrollbar {
+  width: 10px; 
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--scroll-bg);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-handle); 
+  border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--handle-hover);
+}
+
+/* Dark mode scrollbar */
+/* For webkit browsers (Chrome, Safari, etc.) */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--scroll-bg);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-handle);
+  border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--handle-hover);
 }
 
 body {
@@ -72,38 +117,35 @@ body {
     padding: 0;
     margin: 0;
     flex-grow: 1;
+    position: relative; /* Positioning context for the indicator */
+}
+
+.active-indicator {
+    position: absolute;
+    left: 5px;
+    width: 5px; /* Increased thickness */
+    background-color: var(--primary-color);
+    border-radius: 3px;
+    transition: top 0.3s ease, height 0.3s ease; /* Animation */
 }
 
 .sidebar-menu li {
     margin-bottom: 5px;
-    position: relative; /* Needed for absolute positioning of ::before */
+    /* Removed position: relative; */
 }
 
 .sidebar-menu li a {
     display: flex;
     align-items: center;
-    padding: 10px 15px;
+    padding: 10px 15px 10px 20px; /* Increased left padding to create gap */
     margin: 0 10px 0 15px; /* Adjust margin to account for the line outside */
     border-radius: 5px;
     text-decoration: none;
     color: var(--sidebar-text-color);
-    /* Removed position: relative; */
 }
 
 .sidebar-menu li.active a, .sidebar-menu li a:hover {
     background-color: var(--sidebar-active-background);
-}
-
-.sidebar-menu li.active::before {
-    content: '';
-    position: absolute;
-    left: 5px; /* Adjusted to move slightly to the right */
-    top: 50%;
-    transform: translateY(-50%);
-    height: calc(100% - 10px); /* Adjust height for top and bottom gap */
-    width: 5px;
-    background-color: var(--primary-color);
-    border-radius: 3px; /* Rounded corners on all sides */
 }
 
 .sidebar-menu li a i {
@@ -254,11 +296,17 @@ body {
 }
 
 .email-sender {
-    font-weight: bold;
+    font-weight: normal; /* Default to normal */
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.email-item.unread .email-sender,
+.email-item.unread .email-subject,
+.email-item.unread .email-preview {
+    font-weight: bold;
 }
 
 .email-subject {
@@ -328,6 +376,8 @@ body.dark-mode {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 10;
+    backdrop-filter: blur(3px);
+    transition: backdrop-filter 0.3s ease-in-out;
 }
 
 .compose-window {

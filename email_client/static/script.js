@@ -10,24 +10,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const composeBackdrop = document.querySelector('.compose-backdrop');
     const composeWindow = document.querySelector('.compose-window');
     const closeComposeBtn = document.querySelector('.close-compose-btn');
+    const activeIndicator = document.querySelector('.active-indicator');
+
+    // --- Email Data Generation ---
+    const SENDER_NAMES = ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy'];
+    const SUBJECT_LINES = ['Project Update', 'Meeting Reminder', 'Weekly Report', 'Fwd: Important Document', 'Quick Question', 'Lunch Plans', 'Invoice Attached', 'Your Order Has Shipped'];
+    const PREVIEW_TEXT = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
+    let emailIdCounter = 1;
+
+    function generateEmails(count) {
+        const emails = [];
+        for (let i = 0; i < count; i++) {
+            const sender = SENDER_NAMES[Math.floor(Math.random() * SENDER_NAMES.length)];
+            const subject = SUBJECT_LINES[Math.floor(Math.random() * SUBJECT_LINES.length)];
+            emails.push({
+                id: emailIdCounter++,
+                sender: `${sender} ${String.fromCharCode(65 + i)}`, // Add a letter to make it unique
+                subject: subject,
+                preview: PREVIEW_TEXT.substring(0, Math.floor(Math.random() * 50) + 20),
+                body: PREVIEW_TEXT,
+                read: Math.random() > 0.5,
+            });
+        }
+        return emails;
+    }
+
+    function getRandomCount(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
     const emails = {
-        inbox: [
-            { id: 1, sender: 'John Doe', subject: 'Meeting Tomorrow', preview: 'Hey, just wanted to confirm our meeting for tomorrow at 10am.', body: 'Hey, just wanted to confirm our meeting for tomorrow at 10am. Let me know if that still works for you.', read: false },
-            { id: 2, sender: 'Jane Smith', subject: 'Project Proposal', preview: 'Here is the project proposal we discussed.', body: 'Here is the project proposal we discussed. Please review it and let me know your thoughts.', read: true },
-        ],
-        sent: [
-            { id: 3, sender: 'You', subject: 'Re: Project Proposal', preview: 'Thanks for sending this over. I will take a look and get back to you.', body: 'Thanks for sending this over. I will take a look and get back to you.', read: true },
-        ],
-        drafts: [],
-        archive: [],
-        spam: [
-            { id: 4, sender: 'Spammy McSpamface', subject: 'You have won a prize!', preview: 'Click here to claim your prize!', body: 'This is a spam email.', read: false },
-        ],
-        phishing: [
-            { id: 5, sender: 'Bank of Nowhere', subject: 'Action Required: Your account has been suspended', preview: 'Please click here to verify your account details.', body: 'This is a phishing email.', read: false },
-        ],
-        trash: [],
+        inbox: generateEmails(getRandomCount(30, 50)),
+        sent: generateEmails(getRandomCount(20, 40)),
+        drafts: generateEmails(getRandomCount(5, 10)), // Fewer drafts
+        archive: generateEmails(getRandomCount(20, 30)),
+        spam: generateEmails(getRandomCount(25, 45)),
+        phishing: generateEmails(getRandomCount(10, 20)),
+        trash: generateEmails(getRandomCount(15, 25)),
     };
 
     function renderEmailList(folder) {
@@ -88,16 +107,26 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelector('.search-bar').style.display = 'flex';
     }
 
+    function moveIndicator(targetLi) {
+        if (!targetLi) return;
+        const top = targetLi.offsetTop;
+        const height = targetLi.offsetHeight;
+        activeIndicator.style.top = `${top}px`;
+        activeIndicator.style.height = `${height}px`;
+    }
+
     backButton.addEventListener('click', goBack);
 
     sidebarLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             sidebarLinks.forEach(l => l.parentElement.classList.remove('active'));
-            link.parentElement.classList.add('active');
+            const targetLi = link.parentElement;
+            targetLi.classList.add('active');
             const folder = link.querySelector('span').textContent.toLowerCase();
             renderEmailList(folder);
             goBack();
+            moveIndicator(targetLi);
         });
     });
 
@@ -155,4 +184,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Initial render
     renderEmailList('inbox');
+    const initialActiveLi = document.querySelector('.sidebar-menu li.active');
+    moveIndicator(initialActiveLi);
 });
