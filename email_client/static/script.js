@@ -6,6 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const settingsBtn = document.getElementById('settings-btn');
     const settingsView = document.querySelector('.settings-view');
     const themeToggler = document.getElementById('theme-toggler');
+    const newMessageBtn = document.querySelector('.new-message .btn');
+    const composeBackdrop = document.querySelector('.compose-backdrop');
+    const composeWindow = document.querySelector('.compose-window');
+    const closeComposeBtn = document.querySelector('.close-compose-btn');
 
     const emails = {
         inbox: [
@@ -107,6 +111,46 @@ document.addEventListener('DOMContentLoaded', function() {
 
     themeToggler.addEventListener('change', () => {
         document.body.classList.toggle('dark-mode');
+    });
+
+    function showComposeWindow() {
+        composeBackdrop.style.display = 'block';
+        composeWindow.style.display = 'flex';
+    }
+
+    function hideComposeWindow() {
+        composeBackdrop.style.display = 'none';
+        composeWindow.style.display = 'none';
+    }
+
+    newMessageBtn.addEventListener('click', showComposeWindow);
+    closeComposeBtn.addEventListener('click', hideComposeWindow);
+    composeBackdrop.addEventListener('click', hideComposeWindow);
+
+    // Dragging logic for compose window
+    const composeHeader = document.querySelector('.compose-header');
+    let isDragging = false;
+    let offsetX, offsetY;
+
+    composeHeader.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        offsetX = e.clientX - composeWindow.offsetLeft;
+        offsetY = e.clientY - composeWindow.offsetTop;
+        composeWindow.style.transform = ''; // Remove transform to use top/left for positioning
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        
+        let newX = e.clientX - offsetX;
+        let newY = e.clientY - offsetY;
+
+        composeWindow.style.left = `${newX}px`;
+        composeWindow.style.top = `${newY}px`;
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
     });
 
     // Initial render

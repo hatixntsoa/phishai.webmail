@@ -58,6 +58,23 @@
             </div>
         </main>
     </div>
+
+    <div class="compose-backdrop" style="display: none;"></div>
+    <div class="compose-window" style="display: none;">
+        <div class="compose-header">
+            <span>New Message</span>
+            <button class="close-compose-btn"><i class="material-icons-outlined">close</i></button>
+        </div>
+        <div class="compose-body">
+            <input type="text" placeholder="To">
+            <input type="text" placeholder="Subject">
+            <textarea placeholder="Compose email..."></textarea>
+        </div>
+        <div class="compose-footer">
+            <button class="btn btn-primary">Send</button>
+        </div>
+    </div>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

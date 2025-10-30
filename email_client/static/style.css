@@ -1,15 +1,15 @@
 :root {
-    --background-color: #0e0d12;
-    --sidebar-background: #16141c;
+    --background-color: #000;
+    --sidebar-background: #010409;
     --sidebar-text-color: #ffffff;
-    --sidebar-active-background: #24212b;
+    --sidebar-active-background: #15191f;
     --header-background: #ffffff;
     --header-border-color: #e0e0e0;
     --email-item-border-color: #343140;
-    --unread-email-background: #1e1c26;
+    --unread-email-background: #15191f;
     --email-item-hover-background: var(--sidebar-active-background);
     --text-color: #212121;
-    --primary-color: #6d4aff;
+    --primary-color: #235ccf;
 }
 
 body {
@@ -74,18 +74,36 @@ body {
     flex-grow: 1;
 }
 
+.sidebar-menu li {
+    margin-bottom: 5px;
+    position: relative; /* Needed for absolute positioning of ::before */
+}
+
 .sidebar-menu li a {
     display: flex;
     align-items: center;
     padding: 10px 15px;
-    margin: 5px 10px;
+    margin: 0 10px 0 15px; /* Adjust margin to account for the line outside */
     border-radius: 5px;
     text-decoration: none;
     color: var(--sidebar-text-color);
+    /* Removed position: relative; */
 }
 
 .sidebar-menu li.active a, .sidebar-menu li a:hover {
     background-color: var(--sidebar-active-background);
+}
+
+.sidebar-menu li.active::before {
+    content: '';
+    position: absolute;
+    left: 5px; /* Adjusted to move slightly to the right */
+    top: 50%;
+    transform: translateY(-50%);
+    height: calc(100% - 10px); /* Adjust height for top and bottom gap */
+    width: 5px;
+    background-color: var(--primary-color);
+    border-radius: 3px; /* Rounded corners on all sides */
 }
 
 .sidebar-menu li a i {
@@ -125,21 +143,22 @@ body {
 }
 
 .back-button i {
-    color: #a7a4b5;
+    color: #9198a1;
     font-size: 20px;
 }
 
 .back-button:hover {
-    background-color: #1e1c26;
+    background-color: #15191f;
 }
 
 .search-bar {
     display: flex;
     align-items: center;
-    background: #24212b;
+    background: #15191f;
     border-radius: 8px;
     padding: 5px 10px;
     flex-grow: 1; /* Allow the search bar to grow */
+    max-height: 45px;
     max-width: 350px; /* Set the desired max-width */
 }
 
@@ -153,7 +172,7 @@ body {
     outline: none;
     width: 100%;
     margin-left: 10px;
-    color: #a7a4b5; /* Default text color */
+    color: #9198a1; /* Default text color */
 }
 
 .search-bar input:focus {
@@ -162,10 +181,29 @@ body {
 
 .user-menu {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between icons */
 }
 
 .user-menu a {
-    color: #616161;
+    color: #9198a1;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none; /* Remove underline */
+    /* Removed margin-left: 10px; */
+}
+
+.user-menu a i {
+    font-size: 25px;
+}
+
+.user-menu a:hover {
+    background-color: #15191f;
 }
 
 .email-list {
@@ -206,7 +244,7 @@ body {
     width: 24px;
     height: 24px;
     border-radius: 8px;
-    background-color: #3f3b4c;
+    background-color: #262c36;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -253,7 +291,7 @@ body {
     cursor: pointer;
     visibility: hidden;
     font-size: 20px;
-    color: #a7a4b5;
+    color: #9198a1;
 }
 
 .email-item:hover .email-actions i {
@@ -279,4 +317,97 @@ body.dark-mode {
     --header-border-color: #3a3a3a;
     --email-item-border-color: #3a3a3a;
     --text-color: #ffffff;
+}
+
+/* Compose Window Styles */
+.compose-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.compose-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    height: 550px;
+    background-color: var(--sidebar-background);
+    border: 1px solid var(--email-item-border-color);
+    border-radius: 8px;
+    z-index: 11;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+.compose-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #15191f;
+    border-radius: 8px 8px 0 0;
+    color: var(--sidebar-text-color);
+    font-weight: bold;
+    cursor: move; /* Add move cursor for dragging */
+}
+
+.close-compose-btn {
+    background: none;
+    border: none;
+    color: var(--sidebar-text-color);
+    cursor: pointer;
+}
+
+.compose-body {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.compose-body input,
+.compose-body textarea {
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--email-item-border-color);
+    padding: 10px 0;
+    margin-bottom: 10px;
+    color: var(--sidebar-text-color);
+    outline: none;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+}
+
+.compose-body input:focus {
+    border-bottom-color: var(--primary-color);
+}
+
+.compose-body textarea {
+    flex-grow: 1;
+    resize: none;
+    border-bottom: none;
+    height: 200px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+}
+
+.compose-body textarea {
+    flex-grow: 1;
+    resize: none;
+    border-bottom: none;
+    height: 200px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 1em;
+}
+
+.compose-footer {
+    padding: 15px;
+    text-align: right;
 }
