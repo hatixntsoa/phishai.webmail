@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() { // Make function async
     const emailList = document.querySelector('.email-list');
     const emailContent = document.querySelector('.email-content');
     const backButton = document.querySelector('.back-button');
@@ -12,44 +12,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeComposeBtn = document.querySelector('.close-compose-btn');
     const activeIndicator = document.querySelector('.active-indicator');
 
-    // --- Email Data Generation ---
-    const SENDER_NAMES = ['Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Heidi', 'Ivan', 'Judy'];
-    const SUBJECT_LINES = ['Project Update', 'Meeting Reminder', 'Weekly Report', 'Fwd: Important Document', 'Quick Question', 'Lunch Plans', 'Invoice Attached', 'Your Order Has Shipped'];
-    const PREVIEW_TEXT = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.';
-    let emailIdCounter = 1;
+    let emails = {}; // To be populated from JSON
 
-    function generateEmails(count) {
-        const emails = [];
-        for (let i = 0; i < count; i++) {
-            const sender = SENDER_NAMES[Math.floor(Math.random() * SENDER_NAMES.length)];
-            const subject = SUBJECT_LINES[Math.floor(Math.random() * SUBJECT_LINES.length)];
-            emails.push({
-                id: emailIdCounter++,
-                sender: `${sender} ${String.fromCharCode(65 + i)}`, // Add a letter to make it unique
-                subject: subject,
-                preview: PREVIEW_TEXT.substring(0, Math.floor(Math.random() * 50) + 20),
-                body: PREVIEW_TEXT,
-                read: Math.random() > 0.5,
-            });
+    // --- Fetch Email Data ---
+    try {
+        const response = await fetch('/static/emails.json'); // Corrected path
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return emails;
+        emails = await response.json();
+    } catch (error) {
+        console.error("Could not fetch emails:", error);
+        // Optionally, display an error message to the user
+        emailList.innerHTML = '<p style="text-align: center; padding: 20px;">Could not load emails.</p>';
+        return; // Stop execution if emails can't be loaded
     }
-
-    function getRandomCount(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
-
-    const emails = {
-        inbox: generateEmails(getRandomCount(30, 50)),
-        sent: generateEmails(getRandomCount(20, 40)),
-        drafts: generateEmails(getRandomCount(5, 10)), // Fewer drafts
-        archive: generateEmails(getRandomCount(20, 30)),
-        spam: generateEmails(getRandomCount(25, 45)),
-        phishing: generateEmails(getRandomCount(10, 20)),
-        trash: generateEmails(getRandomCount(15, 25)),
-    };
 
     function renderEmailList(folder) {
+        if (!emails[folder]) {
+            console.error(`Folder "${folder}" does not exist in emails data.`);
+            return;
+        }
         emailList.innerHTML = '';
 
         const headerRow = document.createElement('div');
