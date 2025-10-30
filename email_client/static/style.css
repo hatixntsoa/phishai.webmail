@@ -107,7 +107,7 @@ body {
 .header {
     display: flex;
     align-items: center;
-    padding: 10px 20px;
+    padding: 10px 10px; /* Reduced left padding */
     background: var(--background-color);
     border-bottom: 1px solid var(--email-item-border-color);
 }
@@ -117,15 +117,31 @@ body {
     background: none;
     cursor: pointer;
     margin-right: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-button i {
+    color: #a7a4b5;
+    font-size: 20px;
+}
+
+.back-button:hover {
+    background-color: #1e1c26;
 }
 
 .search-bar {
-    flex: 1;
     display: flex;
     align-items: center;
-    background: var(--unread-email-background);
-    border-radius: 5px;
+    background: #24212b;
+    border-radius: 8px;
     padding: 5px 10px;
+    flex-grow: 1; /* Allow the search bar to grow */
+    max-width: 350px; /* Set the desired max-width */
 }
 
 .search-bar i {
@@ -138,10 +154,15 @@ body {
     outline: none;
     width: 100%;
     margin-left: 10px;
+    color: #a7a4b5; /* Default text color */
+}
+
+.search-bar input:focus {
+    color: #ffffff; /* White text color on focus */
 }
 
 .user-menu {
-    margin-left: 20px;
+    margin-left: auto;
 }
 
 .user-menu a {
@@ -151,6 +172,20 @@ body {
 .email-list {
     overflow-y: auto;
     flex-grow: 1;
+}
+
+.email-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--email-item-border-color);
+    font-weight: bold;
+}
+
+.email-count {
+    font-size: 0.8em;
+    color: #616161;
 }
 
 .email-item {
@@ -183,23 +218,35 @@ body {
 
 .email-sender {
     font-weight: bold;
-    width: 150px;
-}
-
-.email-subject {
     flex: 1;
-}
-
-.email-preview {
-    color: #616161;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
+.email-subject {
+    flex: 3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+.email-preview {
+    flex: 1;
+    color: #616161;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
 .email-actions {
+    flex-shrink: 0;
+    width: 120px;
     display: flex;
     align-items: center;
+    justify-content: flex-end;
 }
 
 .email-actions i {

@@ -28,6 +28,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderEmailList(folder) {
         emailList.innerHTML = '';
+
+        const headerRow = document.createElement('div');
+        headerRow.classList.add('email-list-header');
+        const folderName = folder.charAt(0).toUpperCase() + folder.slice(1);
+        headerRow.innerHTML = `
+            <div class="folder-name">${folderName}</div>
+            <div class="email-count">${emails[folder].length}</div>
+        `;
+        emailList.appendChild(headerRow);
+
         emails[folder].forEach(email => {
             const emailItem = document.createElement('div');
             emailItem.classList.add('email-item');
@@ -41,10 +51,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="email-subject">${email.subject}</div>
                 <div class="email-preview">${email.preview}</div>
                 <div class="email-actions">
-                    <i class="material-icons">reply</i>
-                    <i class="material-icons">archive</i>
-                    <i class="material-icons">delete</i>
-                    <i class="material-icons">mark_as_unread</i>
+                    <i class="material-icons-outlined">reply</i>
+                    <i class="material-icons-outlined">archive</i>
+                    <i class="material-icons-outlined">delete</i>
+                    <i class="material-icons-outlined">mark_as_unread</i>
                 </div>
             `;
             emailItem.addEventListener('click', () => showEmail(email, folder));
@@ -59,6 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         settingsView.style.display = 'none';
         emailContent.style.display = 'block';
         backButton.style.display = 'block';
+        document.querySelector('.search-bar').style.display = 'none';
 
         document.querySelector('.email-content-subject').textContent = email.subject;
         document.querySelector('.email-content-sender').textContent = `From: ${email.sender}`;
@@ -70,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
         emailContent.style.display = 'none';
         settingsView.style.display = 'none';
         backButton.style.display = 'none';
+        document.querySelector('.search-bar').style.display = 'flex';
     }
 
     backButton.addEventListener('click', goBack);
