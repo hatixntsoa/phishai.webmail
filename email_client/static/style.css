@@ -116,9 +116,8 @@ body {
     border: none;
     background: none;
     cursor: pointer;
-    margin-right: 10px;
-    width: 36px;
-    height: 36px;
+    width: 45px;
+    height: 45px;
     border-radius: 12px;
     display: flex;
     align-items: center;
