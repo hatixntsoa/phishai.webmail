@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', async function() { // Make functio
                 <div class="email-sender">${email.sender}</div>
                 <div class="email-subject">${email.subject}</div>
                 <div class="email-preview">${email.preview}</div>
+                <div class="email-date">${email.date}</div>
                 <div class="email-actions">
                     <i class="material-icons-outlined">reply</i>
                     <i class="material-icons-outlined">archive</i>

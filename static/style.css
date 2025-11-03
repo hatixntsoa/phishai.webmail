@@ -273,7 +273,26 @@ body {
     padding: 15px 20px;
     border-bottom: 1px solid var(--email-item-border-color);
     cursor: pointer;
+    position: relative;
 }
+
+.email-date {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9198a1;
+    font-size: 14px;
+}
+
+.email-item:hover .email-date {
+    display: none;
+}
+
+.email-item:hover .email-actions {
+    display: flex;
+}
+
 
 .email-item.unread {
     background-color: var(--unread-email-background);
