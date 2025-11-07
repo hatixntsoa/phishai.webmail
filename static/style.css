@@ -187,6 +187,9 @@ body {
 .back-button i {
     color: #9198a1;
     font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .back-button:hover {
@@ -365,11 +368,44 @@ body {
     visibility: visible;
 }
 
+
+.email-preview-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.email-preview-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--email-item-border-color);
+}
+
+.email-preview-header .back-button {
+    margin-right: 15px;
+}
+
+.email-details .email-subject {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 0;
+}
+
+.email-details .email-sender {
+    font-size: 0.9em;
+    color: #9198a1;
+}
+
 .email-content {
-    padding: 20px;
+    padding: 0;
     overflow-y: auto;
     flex-grow: 1;
 }
+.email-content-body{
+    padding: 20px;
+}
+
 
 .settings-view {
     padding: 20px;

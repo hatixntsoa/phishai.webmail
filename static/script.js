@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async function() { // Make function async
     const emailList = document.querySelector('.email-list');
-    const emailContent = document.querySelector('.email-content');
-    const backButton = document.querySelector('.back-button');
+    const emailPreviewContainer = document.querySelector('.email-preview-container');
+    const backButton = document.querySelector('.header .back-button');
     const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
     const settingsBtn = document.getElementById('settings-btn');
     const settingsView = document.querySelector('.settings-view');
@@ -74,18 +74,18 @@ document.addEventListener('DOMContentLoaded', async function() { // Make functio
         renderEmailList(folder);
         emailList.style.display = 'none';
         settingsView.style.display = 'none';
-        emailContent.style.display = 'block';
+        emailPreviewContainer.style.display = 'flex';
         backButton.style.display = 'block';
         document.querySelector('.search-bar').style.display = 'none';
 
-        document.querySelector('.email-content-subject').textContent = email.subject;
-        document.querySelector('.email-content-sender').textContent = `From: ${email.sender}`;
+        document.querySelector('.email-preview-container .email-subject').textContent = email.subject;
+        document.querySelector('.email-preview-container .email-sender').textContent = `From: ${email.sender}`;
         document.querySelector('.email-content-body').textContent = email.body;
     }
 
     function goBack() {
         emailList.style.display = 'block';
-        emailContent.style.display = 'none';
+        emailPreviewContainer.style.display = 'none';
         settingsView.style.display = 'none';
         backButton.style.display = 'none';
         document.querySelector('.search-bar').style.display = 'flex';
@@ -117,9 +117,10 @@ document.addEventListener('DOMContentLoaded', async function() { // Make functio
     settingsBtn.addEventListener('click', (e) => {
         e.preventDefault();
         emailList.style.display = 'none';
-        emailContent.style.display = 'none';
-        backButton.style.display = 'block';
+        emailPreviewContainer.style.display = 'none';
         settingsView.style.display = 'block';
+        backButton.style.display = 'block';
+        document.querySelector('.search-bar').style.display = 'none';
     });
 
     themeToggler.addEventListener('change', () => {
