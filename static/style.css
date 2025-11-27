@@ -70,7 +70,9 @@ body {
 }
 
 .sidebar {
-    width: 240px;
+    width: 240px !important;
+    min-width: 240px !important;
+    flex-shrink: 0 !important;
     background: var(--sidebar-background);
     color: var(--sidebar-text-color);
     display: flex;
@@ -157,7 +159,8 @@ body {
 }
 
 .main-content {
-    flex: 1;
+    flex: 1 !important;
+    min-width: 0 !important;
     display: flex;
     flex-direction: column;
     background-color: var(--background-color);
@@ -252,8 +255,10 @@ body {
 }
 
 .email-list {
+    flex: 1;
     overflow-y: auto;
-    flex-grow: 1;
+    /* flex-grow: 1; */
+    width: 100%;
 }
 
 .email-list-header {
@@ -336,7 +341,7 @@ body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    text-align: center;
+    text-align: left;
 }
 
 .email-preview {
@@ -346,6 +351,15 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+}
+
+.email-sender,
+.email-subject,
+.email-preview {
+    white-space: nowrap;           /* prevents wrapping */
+    overflow: hidden;              /* hides overflow */
+    text-overflow: ellipsis;       /* adds "..." */
+    max-width: 100%;               /* important for flex/grid */
 }
 
 .email-actions {

@@ -80,7 +80,9 @@
             <button class="btn btn-primary">Send</button>
         </div>
     </div>
-
+    <script>
+        window.REAL_EMAILS = {{ emails|tojson }};
+    </script>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>
