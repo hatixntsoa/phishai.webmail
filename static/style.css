@@ -303,7 +303,7 @@ body {
 
 
 .email-item.unread {
-    background-color: var(--unread-email-background);
+    /* background-color: var(--unread-email-background); */
 }
 
 .email-item:hover {
@@ -404,6 +404,10 @@ body {
     font-size: 1.2em;
     font-weight: bold;
     margin: 0;
+    white-space: nowrap;           /* prevents wrapping */
+    overflow: hidden;              /* hides overflow */
+    text-overflow: ellipsis;       /* adds "..." */
+    max-width: 100%; 
 }
 
 .email-details .email-sender {
