@@ -24,7 +24,7 @@ SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 USE_TLS = os.getenv("SMTP_TLS", "true").lower() == "true"
 
 # Global state
-latest_emails = {"inbox": [], "sent": [], "trash": []}
+latest_emails = {"inbox": [], "sent": [], "trash": [], "phishing": []}
 new_mail_event = Event()
 
 
@@ -150,6 +150,16 @@ def imap_idle_watcher():
             imap.select(trash_folder_name)
             trash_emails = fetch_folder_emails(imap)
 
+            # PHISHING
+            try:
+                imap.select("Phishing")
+                phishing_emails = fetch_folder_emails(imap)
+                if phishing_emails != latest_emails["phishing"]:
+                    latest_emails["phishing"] = phishing_emails
+                    new_mail_event.set()
+            except:
+                pass  # folder may not exist yet or permission issue
+
             if trash_emails != latest_emails["trash"]:
                 latest_emails["trash"] = trash_emails
                 new_mail_event.set()
@@ -184,12 +194,13 @@ def api_emails():
         return jsonify(latest_emails["sent"])
     if folder in ["trash", "bin", "deleted", "[gmail]/trash"]:
         return jsonify(latest_emails["trash"])
+    if folder in ["phishing", "spam"]:
+        return jsonify(latest_emails["phishing"])
     return jsonify(latest_emails["inbox"])
 
 
 @app.route("/send", methods=["POST"])
 def send_email():
-    # ... (unchanged, perfect as-is)
     try:
         to_addr = request.form.get("to_addr")
         subject = request.form.get("subject")
@@ -235,10 +246,10 @@ def send_email():
 @app.route("/stream")
 def stream():
     def event_stream():
-        last_counts = {"inbox": 0, "sent": 0, "trash": 0}
+        last_counts = {"inbox": 0, "sent": 0, "trash": 0, "phishing": 0}
         while True:
             if new_mail_event.wait(timeout=25):
-                for folder in ["inbox", "sent", "trash"]:
+                for folder in ["inbox", "sent", "trash", "phishing"]:
                     current_len = len(latest_emails[folder])
                     if current_len != last_counts[folder]:
                         yield f'event: {folder}\ndata: {json.dumps(latest_emails[folder])}\n\n'

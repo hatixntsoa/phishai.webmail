@@ -2,7 +2,7 @@
 // GLOBALS
 // ———————————————————————————————
 let currentEmails = [];
-let emails = { inbox: [], sent: [], trash: [] };
+let emails = { inbox: [], sent: [], trash: [], phishing: [] };
 let lastEmailCount = { inbox: 0, sent: 0 };
 
 // ———————————————————————————————
@@ -257,6 +257,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         emails.trash = data;
                         window.renderEmailList('trash');
                     });
+            } else if (folder === 'phishing') {
+                fetch('/api/emails?folder=phishing')
+                    .then(r => r.json())
+                    .then(data => {
+                        emails.phishing = data;
+                        window.renderEmailList('phishing');
+                    });
             } else {
                 emailListBody.innerHTML = `<p style="text-align:center;padding:60px;color:#888;">${folder.charAt(0).toUpperCase() + folder.slice(1)} coming soon...</p>`;
             }
@@ -320,6 +327,15 @@ document.addEventListener('DOMContentLoaded', function () {
             emails.trash = data;
             if (document.querySelector('.sidebar-menu li.active span')?.textContent.toLowerCase() === 'trash') {
                 window.renderEmailList('trash');
+            }
+        } catch (err) {}
+    });
+    evtSource.addEventListener("phishing", e => {
+        try {
+            const data = JSON.parse(e.data);
+            emails.phishing = data;
+            if (document.querySelector('.sidebar-menu li.active span')?.textContent.toLowerCase() === 'phishing') {
+                window.renderEmailList('phishing');
             }
         } catch (err) {}
     });
