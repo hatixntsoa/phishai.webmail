@@ -289,6 +289,14 @@ body {
     position: relative;
 }
 
+/* This is the magic: bottom shadow on hover */
+.email-item:hover {
+    /* box-shadow: 0 8px 16px #235ccf; */
+    /* box-shadow: 0px 6px 19px 12px rgba(0,0,0,0.21); */
+    background-color: #15191f;
+    position: relative;
+}
+
 .email-date {
     position: absolute;
     right: 20px;

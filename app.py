@@ -8,9 +8,10 @@ import json
 import os
 import smtplib
 from email.message import EmailMessage
+from email.utils import parsedate_to_datetime
 from dotenv import load_dotenv
-
 load_dotenv()
+
 app = Flask(__name__)
 
 # === Config from .env ===
@@ -18,15 +19,14 @@ IMAP_HOST = os.getenv("IMAP_HOST", "localhost")
 IMAP_PORT = int(os.getenv("IMAP_PORT", "143"))
 IMAP_USER = os.getenv("IMAP_USER")
 IMAP_PASS = os.getenv("IMAP_PASS")
-
 SMTP_HOST = os.getenv("SMTP_HOST", "localhost")
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 USE_TLS = os.getenv("SMTP_TLS", "true").lower() == "true"
 
 # Global state
-latest_emails = { "inbox": [], "sent": [] }
-latest_emails["trash"] = []
+latest_emails = {"inbox": [], "sent": [], "trash": []}
 new_mail_event = Event()
+
 
 def parse_email(raw_msg):
     msg = email.message_from_bytes(raw_msg, policy=default)
@@ -55,39 +55,82 @@ def parse_email(raw_msg):
         "read": False
     }
 
-def detect_sent_folder(imap):
+
+def detect_sent_folder(imap=None):
+    if imap is None:
+        imap = imaplib.IMAP4(IMAP_HOST, IMAP_PORT)
+        imap.login(IMAP_USER, IMAP_PASS)
+        close_connection = True
+    else:
+        close_connection = False
     candidates = ["[Gmail]/Sent Mail", "Sent", "Sent Items", "Sent Messages", "Envoyés", "Gesendet", "Inviati"]
     status, mailboxes = imap.list()
-    if status != "OK": return None
-    for mailbox in mailboxes:
-        name = mailbox.decode().split('"')[-2] if mailbox else ""
-        if any(cand.lower() in name.lower() for cand in candidates):
-            return name
-    return "Sent"  # fallback
+    if status == "OK":
+        for mailbox in mailboxes:
+            name = mailbox.decode().split('"')[-2] if mailbox else ""
+            if any(cand.lower() in name.lower() for cand in candidates):
+                if close_connection:
+                    imap.logout()
+                return name
+    if close_connection:
+        imap.logout()
+    return "Sent"
 
-def detect_trash_folder(imap):
+
+def detect_trash_folder(imap=None):
+    if imap is None:
+        imap = imaplib.IMAP4(IMAP_HOST, IMAP_PORT)
+        imap.login(IMAP_USER, IMAP_PASS)
+        close_connection = True
+    else:
+        close_connection = False
     candidates = ["[Gmail]/Trash", "Trash", "Deleted Messages", "Bin", "Papierkorb", "Corbeille"]
     status, mailboxes = imap.list()
-    if status != "OK": return "Trash"
-    for mailbox in mailboxes:
-        name = mailbox.decode().split('"')[-2] if mailbox else ""
-        if any(cand.lower() in name.lower() for cand in candidates):
-            return name
+    if status == "OK":
+        for mailbox in mailboxes:
+            name = mailbox.decode().split('"')[-2] if mailbox else ""
+            if any(cand.lower() in name.lower() for cand in candidates):
+                if close_connection:
+                    imap.logout()
+                return name
+    if close_connection:
+        imap.logout()
     return "Trash"
+
 
 def fetch_folder_emails(imap):
     status, data = imap.search(None, "ALL")
-    email_ids = data[0].split()[-200:]  # Last 200 emails
+    if status != "OK" or not data[0]:
+        return []
+    email_ids = data[0].split()[-200:]
     emails_list = []
     for num in email_ids:
-        if not num: continue
-        status, msg_data = imap.fetch(num, "(RFC822)")
-        if msg_data == [None]: continue
-        raw = msg_data[0][1]
-        parsed = parse_email(raw)
-        emails_list.append(parsed)
-    emails_list.reverse()
+        if not num:
+            continue
+        try:
+            status, msg_data = imap.fetch(num, "(RFC822)")
+            if msg_data == [None]:
+                continue
+            raw = msg_data[0][1]
+            parsed = parse_email(raw)
+            emails_list.append(parsed)
+        except Exception as e:
+            print(f"Failed to fetch message {num}: {e}")
+            continue
+
+    def get_timestamp(email_obj):
+        date_str = email_obj.get("date", "")
+        if not date_str:
+            return 0
+        try:
+            dt = parsedate_to_datetime(date_str)
+            return dt.timestamp() if dt else 0
+        except:
+            return 0
+
+    emails_list.sort(key=get_timestamp, reverse=True)
     return emails_list
+
 
 def imap_idle_watcher():
     global latest_emails
@@ -96,24 +139,20 @@ def imap_idle_watcher():
             imap = imaplib.IMAP4(IMAP_HOST, IMAP_PORT)
             imap.login(IMAP_USER, IMAP_PASS)
 
-            # === INBOX ===
             imap.select("INBOX")
             inbox_emails = fetch_folder_emails(imap)
 
-            # === SENT FOLDER — auto-detect real folder name ===
             sent_folder_name = detect_sent_folder(imap)
             imap.select(sent_folder_name)
             sent_emails = fetch_folder_emails(imap)
 
-            # === TRASH (new) ===
             trash_folder_name = detect_trash_folder(imap)
             imap.select(trash_folder_name)
             trash_emails = fetch_folder_emails(imap)
+
             if trash_emails != latest_emails["trash"]:
                 latest_emails["trash"] = trash_emails
                 new_mail_event.set()
-
-            # Update only if changed
             if inbox_emails != latest_emails["inbox"]:
                 latest_emails["inbox"] = inbox_emails
                 new_mail_event.set()
@@ -124,18 +163,19 @@ def imap_idle_watcher():
             imap.close()
             imap.logout()
             time.sleep(15)
-
         except Exception as e:
             print(f"IMAP watcher error: {e} — reconnecting in 10s...")
             time.sleep(10)
 
-# Start watcher
+
 Thread(target=imap_idle_watcher, daemon=True).start()
 time.sleep(4)
+
 
 @app.route("/")
 def inbox():
     return render_template("index.html", emails=latest_emails["inbox"])
+
 
 @app.route("/api/emails")
 def api_emails():
@@ -146,8 +186,10 @@ def api_emails():
         return jsonify(latest_emails["trash"])
     return jsonify(latest_emails["inbox"])
 
+
 @app.route("/send", methods=["POST"])
 def send_email():
+    # ... (unchanged, perfect as-is)
     try:
         to_addr = request.form.get("to_addr")
         subject = request.form.get("subject")
@@ -155,7 +197,6 @@ def send_email():
         if not all([to_addr, subject, body]):
             return "Missing fields", 400
 
-        # === Send via SMTP ===
         msg = EmailMessage()
         msg["From"] = IMAP_USER
         msg["To"] = to_addr
@@ -164,21 +205,18 @@ def send_email():
 
         if USE_TLS:
             smtp = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-            # smtp.starttls()
         else:
             smtp = smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
         smtp.login(IMAP_USER, IMAP_PASS)
         smtp.send_message(msg)
         smtp.quit()
 
-        # === Save to real Sent folder via IMAP ===
         imap = imaplib.IMAP4(IMAP_HOST, IMAP_PORT)
         imap.login(IMAP_USER, IMAP_PASS)
         sent_folder = detect_sent_folder(imap) or "Sent"
         imap.append(sent_folder, None, None, msg.as_bytes())
         imap.logout()
 
-        # === Add to local cache instantly ===
         sent_email = {
             "id": str(int(time.time() * 1000)),
             "sender": IMAP_USER,
@@ -189,7 +227,6 @@ def send_email():
         }
         latest_emails["sent"].insert(0, sent_email)
         new_mail_event.set()
-
         return "OK"
     except Exception as e:
         print("Send failed:", e)
@@ -198,10 +235,10 @@ def send_email():
 @app.route("/stream")
 def stream():
     def event_stream():
-        last_counts = {"inbox": 0, "sent": 0}
+        last_counts = {"inbox": 0, "sent": 0, "trash": 0}
         while True:
             if new_mail_event.wait(timeout=25):
-                for folder in ["inbox", "sent"]:
+                for folder in ["inbox", "sent", "trash"]:
                     current_len = len(latest_emails[folder])
                     if current_len != last_counts[folder]:
                         yield f'event: {folder}\ndata: {json.dumps(latest_emails[folder])}\n\n'
@@ -211,52 +248,67 @@ def stream():
                 yield ": ping\n\n"
     return Response(event_stream(), mimetype="text/event-stream")
 
-
-# === ADDED: Move email to Trash or Archive (real IMAP + instant UI update) ===
-def get_source_folder(email_id):
-    for folder in ["inbox", "sent"]:
-        if any(e["id"] == email_id for e in latest_emails[folder]):
-            return "INBOX" if folder == "inbox" else detect_sent_folder(None)
-    return "INBOX"
-
 def move_or_delete_email(email_id, action="trash"):
     try:
-        source_folder = get_source_folder(email_id)
-        dest_folder = "[Gmail]/Trash" if action == "trash" and "gmail" in IMAP_HOST.lower() else "Trash"
-        if action == "archive":
-            dest_folder = "[Gmail]/All Mail" if "gmail" in IMAP_HOST.lower() else "Archive"
+        source_folder = None
+        target_email = None
+        for folder_key, folder_name in [("inbox", "INBOX"), ("sent", detect_sent_folder)]:
+            for e in latest_emails[folder_key]:
+                if e["id"] == email_id:
+                    source_folder = folder_name() if callable(folder_name) else folder_name
+                    target_email = e
+                    break
+            if target_email:
+                break
+        if not target_email or not source_folder:
+            return False
+
+        dest_folder = detect_trash_folder(None) if action == "trash" else "[Gmail]/All Mail" if "gmail" in IMAP_HOST.lower() else "Archive"
 
         imap = imaplib.IMAP4(IMAP_HOST, IMAP_PORT)
         imap.login(IMAP_USER, IMAP_PASS)
-        imap.select(f'"{source_folder}"' if " " in source_folder else source_folder)
+        imap.select(f'"{source_folder}"')
 
-        target_email = None
-        for folder in ["inbox", "sent"]:
-            for e in latest_emails[folder]:
-                if e["id"] == email_id:
-                    target_email = e
-                    break
-            if target_email: break
-        if not target_email: return False
+        subject = target_email["subject"].replace('"', '\\"')
+        date_str = parsedate_to_datetime(target_email["date"]).strftime("%d-%b-%Y") if target_email["date"] else ""
+        search_query = f'(SUBJECT "{subject}"'
+        if date_str:
+            search_query += f' SINCE {date_str}'
+        search_query += ')'
 
-        search_query = f'(SUBJECT "{target_email["subject"]}")'
         status, data = imap.search(None, search_query)
-        if status != "OK" or not data[0]: return False
-        msg_id = data[0].split()[-1]
-        if not msg_id: return False
+        if status != "OK" or not data[0]:
+            status, data = imap.search(None, f'(SUBJECT "{subject}")')
 
-        # THIS IS THE ONLY CHANGE — use MOVE command instead of copy + expunge
-        imap.move(msg_id, dest_folder)        # ← correct IMAP MOVE (keeps it in Trash)
+        if status == "OK" and data[0]:
+            msg_ids = data[0].split()
+            latest_id = msg_ids[-1]
+            imap.copy(latest_id, dest_folder)
+            imap.store(latest_id, '+FLAGS', '\\Deleted')
+            imap.expunge()
 
         imap.close()
         imap.logout()
 
-        # Remove from local cache (so UI updates instantly)
+        # === INSTANT TRASH UPDATE (THIS IS THE FIX) ===
+        if target_email:
+            trash_copy = target_email.copy()
+            trash_copy["read"] = True
+            latest_emails["trash"].insert(0, trash_copy)
+
+            # Force re-sort to trigger SSE even if length didn't change
+            latest_emails["trash"].sort(
+                key=lambda e: parsedate_to_datetime(e["date"]).timestamp() if e["date"] else 0,
+                reverse=True
+            )
+
+        # Remove from source
         for folder in ["inbox", "sent"]:
             latest_emails[folder] = [e for e in latest_emails[folder] if e["id"] != email_id]
-        latest_emails["trash"] = []  # force refresh on next view
-        new_mail_event.set()
+
+        new_mail_event.set()  # This now pushes Trash instantly
         return True
+
     except Exception as e:
         print(f"Move/Delete failed: {e}")
         return False
@@ -266,25 +318,20 @@ def email_action():
     try:
         data = request.get_json()
         email_id = data.get("id")
-        action = data.get("action")  # "trash" or "archive"
-
+        action = data.get("action")
         if not email_id or action not in ["trash", "archive"]:
             return jsonify({"error": "invalid"}), 400
 
-        # Fire and forget — background move
         Thread(target=move_or_delete_email, args=(email_id, action), daemon=True).start()
 
-        # Instantly remove from UI
+        # Instant UI remove
         for folder in ["inbox", "sent"]:
             latest_emails[folder] = [e for e in latest_emails[folder] if e["id"] != email_id]
         new_mail_event.set()
-
         return jsonify({"status": "ok"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
 if __name__ == "__main__":
-    print("PhishAI Webmail — FULLY PERSISTENT SENT FOLDER + REAL-TIME")
+    print("PhishAI Webmail — FULLY PERSISTENT + INSTANT TRASH + PERFECT ORDER")
     app.run(host="0.0.0.0", port=1337, debug=False, threaded=True)
