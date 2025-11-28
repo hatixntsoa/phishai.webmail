@@ -1,8 +1,8 @@
 // ———————————————————————————————
-// GLOBALS – exactly like your original working version
+// GLOBALS
 // ———————————————————————————————
 let currentEmails = [];
-let emails = { inbox: [], sent: [] };
+let emails = { inbox: [], sent: [], trash: [] };
 let lastEmailCount = { inbox: 0, sent: 0 };
 
 // ———————————————————————————————
@@ -10,6 +10,11 @@ let lastEmailCount = { inbox: 0, sent: 0 };
 // ———————————————————————————————
 document.addEventListener('DOMContentLoaded', function () {
     const emailList = document.querySelector('.email-list');
+    const emailListBody = document.querySelector('.email-list-body'); // ← scrollable part
+    const emailListHeader = document.querySelector('.email-list-header');
+    const folderNameEl = document.querySelector('.email-list-header .folder-name');
+    const emailCountEl = document.querySelector('.email-list-header .email-count');
+
     const emailPreviewContainer = document.querySelector('.email-preview-container');
     const backButton = document.querySelector('.header .back-button');
     const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
@@ -22,13 +27,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeComposeBtn = document.querySelector('.close-compose-btn');
     const activeIndicator = document.querySelector('.active-indicator');
 
-    // Compose
+    // Compose inputs
     const toInput = composeWindow.querySelector('input[placeholder="To"]');
     const subjectInput = composeWindow.querySelector('input[placeholder="Subject"]');
     const bodyTextarea = composeWindow.querySelector('textarea');
     const sendBtn = composeWindow.querySelector('.btn-primary');
 
-    // Load initial inbox from Flask
+    // Load initial inbox
     currentEmails = Array.isArray(window.REAL_EMAILS) ? window.REAL_EMAILS : [];
     emails.inbox = currentEmails;
     lastEmailCount.inbox = currentEmails.length;
@@ -48,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
         const msgDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
         if (msgDate.getTime() === today.getTime()) {
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         }
@@ -58,20 +64,23 @@ document.addEventListener('DOMContentLoaded', function () {
         return date.toLocaleDateString([], { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
 
-    // YOUR ORIGINAL EMAIL ROW UI — 100% UNTOUCHED
+    // ———————————————————————————————
+    // RENDER EMAIL LIST — FIXED VERSION
+    // ———————————————————————————————
     window.renderEmailList = function (folder = 'inbox') {
         const data = emails[folder] || [];
-        emailList.innerHTML = '';
+
+        // Update sticky header (never destroyed)
+        folderNameEl.textContent = folder.charAt(0).toUpperCase() + folder.slice(1);
+        emailCountEl.textContent = data.length;
+
+        // Clear only the scrollable body
+        emailListBody.innerHTML = '';
 
         if (data.length === 0) {
-            emailList.innerHTML = `<p style="text-align:center;padding:60px;color:#888;">No messages in ${folder.charAt(0).toUpperCase() + folder.slice(1)}</p>`;
+            emailListBody.innerHTML = `<p style="text-align:center;padding:60px;color:#888;">No messages in ${folder.charAt(0).toUpperCase() + folder.slice(1)}</p>`;
             return;
         }
-
-        const header = document.createElement('div');
-        header.classList.add('email-list-header');
-        header.innerHTML = `<div class="folder-name">${folder.charAt(0).toUpperCase() + folder.slice(1)}</div><div class="email-count">${data.length}</div>`;
-        emailList.appendChild(header);
 
         data.forEach(email => {
             const item = document.createElement('div');
@@ -79,7 +88,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!email.read) item.classList.add('unread');
 
             const initial = (email.sender || '?').charAt(0).toUpperCase();
-
             item.innerHTML = `
                 <div class="email-sender-initial">${initial}</div>
                 <div class="email-sender">${escapeHtml(email.sender || 'Unknown')}</div>
@@ -93,11 +101,44 @@ document.addEventListener('DOMContentLoaded', function () {
             `;
 
             item.addEventListener('click', e => {
-                if (e.target.closest('.email-actions')) return;
+                const actionIcon = e.target.closest('.email-actions i');
+                if (actionIcon) {
+                    e.stopPropagation();
+                    const iconName = actionIcon.textContent.trim();
+                    const emailId = email.id;
+
+                    if (iconName === 'delete') {
+                        if (!confirm("Move this message to Trash?")) return;
+                        fetch('/action', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: emailId, action: 'trash' })
+                        }).then(() => {
+                            item.style.transition = 'opacity 0.3s';
+                            item.style.opacity = '0';
+                            setTimeout(() => item.remove(), 300);
+                            // Update count live
+                            emailCountEl.textContent = --data.length;
+                        });
+                    }
+                    if (iconName === 'archive') {
+                        fetch('/action', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: emailId, action: 'archive' })
+                        }).then(() => {
+                            item.style.transition = 'opacity 0.3s';
+                            item.style.opacity = '0';
+                            setTimeout(() => item.remove(), 300);
+                            emailCountEl.textContent = --data.length;
+                        });
+                    }
+                    return;
+                }
                 showEmail(email);
             });
 
-            emailList.appendChild(item);
+            emailListBody.appendChild(item); // ← append to body only
         });
     };
 
@@ -117,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function goBack() {
-        emailList.style.display = 'block';
+        emailList.style.display = 'flex';
         emailPreviewContainer.style.display = 'none';
         settingsView.style.display = 'none';
         backButton.style.display = 'none';
@@ -130,7 +171,9 @@ document.addEventListener('DOMContentLoaded', function () {
         activeIndicator.style.height = `${li.offsetHeight}px`;
     }
 
+    // ———————————————————————————————
     // SEND EMAIL
+    // ———————————————————————————————
     sendBtn.onclick = async function () {
         const to = toInput.value.trim();
         const subject = subjectInput.value.trim();
@@ -141,14 +184,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         sendBtn.disabled = true;
         sendBtn.textContent = "Sending...";
-
         try {
             const res = await fetch('/send', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({ to_addr: to, subject, body })
             });
-
             if (res.ok) {
                 hideCompose();
                 const sentLink = Array.from(sidebarLinks).find(l =>
@@ -182,7 +223,9 @@ document.addEventListener('DOMContentLoaded', function () {
     composeBackdrop.onclick = hideCompose;
     backButton.addEventListener('click', goBack);
 
-    // SIDEBAR — loads correct folder every time
+    // ———————————————————————————————
+    // SIDEBAR NAVIGATION
+    // ———————————————————————————————
     sidebarLinks.forEach(link => {
         link.addEventListener('click', e => {
             e.preventDefault();
@@ -198,7 +241,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(r => r.json())
                     .then(data => {
                         emails.inbox = data;
-                        lastEmailCount.inbox = data.length;
                         window.renderEmailList('inbox');
                     });
             } else if (folder === 'sent') {
@@ -206,13 +248,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     .then(r => r.json())
                     .then(data => {
                         emails.sent = data;
-                        lastEmailCount.sent = data.length;
                         window.renderEmailList('sent');
                     });
+            } else if (folder === 'trash') {
+                fetch('/api/emails?folder=trash')
+                    .then(r => r.json())
+                    .then(data => {
+                        emails.trash = data;
+                        window.renderEmailList('trash');
+                    });
             } else {
-                emailList.innerHTML = `<p style="text-align:center;padding:60px;color:#888;">${folder.charAt(0).toUpperCase() + folder.slice(1)} coming soon...</p>`;
+                emailListBody.innerHTML = `<p style="text-align:center;padding:60px;color:#888;">${folder.charAt(0).toUpperCase() + folder.slice(1)} coming soon...</p>`;
             }
-
             goBack();
         });
     });
@@ -227,7 +274,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     themeToggler.onchange = () => document.body.classList.toggle('dark-mode');
 
-    // Draggable compose
+    // Draggable compose window
     let dragging = false, ox, oy;
     document.querySelector('.compose-header').onmousedown = e => {
         dragging = true;
@@ -242,34 +289,39 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     document.onmouseup = () => dragging = false;
 
-    // Initial render
+    // ———————————————————————————————
+    // INITIAL RENDER + REAL-TIME UPDATES
+    // ———————————————————————————————
     window.renderEmailList('inbox');
     moveIndicator(document.querySelector('.sidebar-menu li.active'));
 
-    // REAL-TIME — supports both Inbox & Sent
     const evtSource = new EventSource("/stream");
-
     evtSource.addEventListener("inbox", e => {
         try {
             const data = JSON.parse(e.data);
             emails.inbox = data;
-            lastEmailCount.inbox = data.length;
             if (document.querySelector('.sidebar-menu li.active span')?.textContent.toLowerCase() === 'inbox') {
                 window.renderEmailList('inbox');
             }
         } catch (err) {}
     });
-
     evtSource.addEventListener("sent", e => {
         try {
             const data = JSON.parse(e.data);
             emails.sent = data;
-            lastEmailCount.sent = data.length;
             if (document.querySelector('.sidebar-menu li.active span')?.textContent.toLowerCase() === 'sent') {
                 window.renderEmailList('sent');
             }
         } catch (err) {}
     });
-
+    evtSource.addEventListener("trash", e => {
+        try {
+            const data = JSON.parse(e.data);
+            emails.trash = data;
+            if (document.querySelector('.sidebar-menu li.active span')?.textContent.toLowerCase() === 'trash') {
+                window.renderEmailList('trash');
+            }
+        } catch (err) {}
+    });
     evtSource.onerror = () => console.warn("SSE disconnected");
 });
