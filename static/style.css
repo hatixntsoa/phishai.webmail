@@ -82,17 +82,33 @@ body {
 
 .sidebar-header {
     padding: 20px;
-    text-align: center;
+    text-align: left;
 }
 
 .logo {
     width: 120px;
     height: 30px;
-    text-align: center;
+    text-align: left;
     font-size: 1.5em;
     font-weight: bold;
     color: #fff;
-    margin: 0 auto;
+    /* margin: 0 auto; */
+}
+
+.sidebar-header .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;                    /* space between image and text */
+    /* padding: 16px 20px; */
+    font-weight: 700;
+    font-size: 1.4rem;
+}
+
+.sidebar-header .logo-img {
+    width: 40px;                  /* adjust size as needed */
+    height: 40px;
+    border-radius: 8px;           /* optional: rounded corners */
+    object-fit: contain;
 }
 
 .new-message {
