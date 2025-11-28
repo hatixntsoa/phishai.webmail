@@ -246,18 +246,26 @@ def send_email():
 @app.route("/stream")
 def stream():
     def event_stream():
-        last_counts = {"inbox": 0, "sent": 0, "trash": 0, "phishing": 0}
+        # Start with impossible values so first run always pushes everything
+        last_update = {
+            "inbox": 0, "sent": 0, "trash": 0,
+            "phishing": 0
+        }
+
         while True:
             if new_mail_event.wait(timeout=25):
                 for folder in ["inbox", "sent", "trash", "phishing"]:
-                    current_len = len(latest_emails[folder])
-                    if current_len != last_counts[folder]:
+                    # Force push every single time the watcher ran
+                    current_hash = hash(json.dumps(latest_emails[folder], sort_keys=True))
+                    if current_hash != last_update[folder]:
                         yield f'event: {folder}\ndata: {json.dumps(latest_emails[folder])}\n\n'
-                        last_counts[folder] = current_len
+                        last_update[folder] = current_hash
                 new_mail_event.clear()
             else:
                 yield ": ping\n\n"
+
     return Response(event_stream(), mimetype="text/event-stream")
+
 
 def move_or_delete_email(email_id, action="trash"):
     try:
