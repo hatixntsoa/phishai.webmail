@@ -19,6 +19,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Ignore the docker-mail server data
+**/server/*
+
 # C extensions
 *.so
 
