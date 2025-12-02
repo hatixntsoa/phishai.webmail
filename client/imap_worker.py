@@ -15,14 +15,14 @@ def safe_decode(x):
 def fetch_folder_emails(imap, folder=None):
     if folder:
         imap.select(folder)
-    status, data = imap.search(None, "ALL")
+    status, data = imap.uid('SEARCH', None, "ALL")
     if status != "OK" or not data[0]:
         return []
     email_ids = data[0].split()[-200:]
     emails = []
     for num in email_ids:
         try:
-            status, msg_data = imap.fetch(num, "(RFC822)")
+            status, msg_data = imap.uid('FETCH', num, "(RFC822 FLAGS)")
             if msg_data == [None]:
                 continue
             raw = msg_data[0][1]
