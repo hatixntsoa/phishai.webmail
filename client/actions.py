@@ -9,6 +9,32 @@ from core.state import latest_emails, new_mail_event
 from utils.helpers import detect_trash_folder
 from utils.helpers import detect_sent_folder, detect_trash_folder
 
+
+def move_msg(imap, msg_uid, src_folder, dst_folder):
+    try:
+        # Must be in the source folder and in read-write mode
+        imap.select(f'"{src_folder}"', readonly=False)
+
+        # Use UID commands — this is the key fix!
+        status, _ = imap.uid('COPY', msg_uid, dst_folder)
+        if status != 'OK':
+            print(f"[MOVE FAILED] COPY failed for UID {msg_uid}")
+            return False
+
+        # Mark as Deleted using UID
+        imap.uid('STORE', msg_uid, '+FLAGS', '\\Deleted')
+        
+        # Expunge using UID command (some servers require it)
+        imap.expunge()
+        
+        print(f"[MOVE SUCCESS] UID {msg_uid} moved from {src_folder} → {dst_folder}")
+        return True
+
+    except Exception as e:
+        print(f"[MOVE ERROR] {e}")
+        return False
+
+
 def move_or_delete_email(email_id, action="trash"):
     try:
         source_folder = None

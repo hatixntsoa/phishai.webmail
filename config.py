@@ -1,9 +1,9 @@
-# config.py
-import os
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
+MODEL_API = "http://localhost:8000/predict"
 IMAP_HOST = os.getenv("IMAP_HOST", "localhost")
 IMAP_PORT = int(os.getenv("IMAP_PORT", "143"))
 IMAP_USER = os.getenv("IMAP_USER")

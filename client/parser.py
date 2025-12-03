@@ -31,7 +31,8 @@ def parse_email(raw_msg):
         "subject": subject,
         "body": body,
         "date": date,
-        "read": False
+        "read": False,
+        "from": msg["From"] or "Unknown <unknown@example.com>",
     }
 
 def get_timestamp(email_obj):
