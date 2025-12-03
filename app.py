@@ -31,5 +31,3 @@ if __name__ == "__main__":
 
     print("PhishAI Webmail")
     app.run(host='0.0.0.0', port=1337, debug=False, use_reloader=False)
-
-    # app.run(host="0.0.0.0", port=1337, debug=False, threaded=True)

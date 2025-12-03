@@ -1,15 +1,13 @@
+from core.state import latest_emails, new_mail_event
+from utils.helpers import detect_sent_folder
 from email.message import EmailMessage
-
 from flask import request
 
 import smtplib
 import imaplib
-
 import time
 
 from config import IMAP_USER, IMAP_PASS, IMAP_HOST, IMAP_PORT, SMTP_HOST, SMTP_PORT, USE_TLS
-from core.state import latest_emails, new_mail_event
-from utils.helpers import detect_sent_folder
 
 def send_email_logic():
     try:

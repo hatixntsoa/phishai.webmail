@@ -30,7 +30,7 @@ def email_action():
         # Instant UI removal from inbox/sent
         for folder in ["inbox", "sent"]:
             latest_emails[folder] = [e for e in latest_emails[folder] if e["id"] != email_id]
-        
+
         new_mail_event.set()
         return jsonify({"status": "ok"})
     except Exception as e:

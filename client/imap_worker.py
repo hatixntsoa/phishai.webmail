@@ -68,7 +68,7 @@ def ensure_phishing_folder():
         imap.login(IMAP_USER, IMAP_PASS)
         imap.create('"Phishing"')
         imap.logout()
-        # print("Created folder: Phishing")
+        print("Created folder: Phishing")
     except:
         pass
 
@@ -76,15 +76,13 @@ def ensure_phishing_folder():
 ensure_phishing_folder()
 
 
-# INITIAL SYNC — 100% safe order
 print("Running initial IMAP sync...")
 imap = imaplib.IMAP4(IMAP_HOST, IMAP_PORT)
 imap.login(IMAP_USER, IMAP_PASS)
-imap.select("INBOX")  # Must select first!
+imap.select("INBOX")
 
 latest_emails["inbox"] = fetch_folder_emails(imap, "INBOX")
 
-# Now safe to detect folders
 sent_folder = detect_sent_folder(imap)
 trash_folder = detect_trash_folder(imap)
 
@@ -97,7 +95,6 @@ new_mail_event.set()
 print("Initial sync complete — inbox ready!")
 
 
-# BACKGROUND POLLING — bulletproof
 def imap_polling_watcher():
     while True:
         imap = None
@@ -105,7 +102,6 @@ def imap_polling_watcher():
             imap = imaplib.IMAP4(IMAP_HOST, IMAP_PORT)
             imap.login(IMAP_USER, IMAP_PASS)
 
-            # INBOX: detect new mail fast
             imap.select("INBOX", readonly=True)
             status, data = imap.status("INBOX", "(MESSAGES UIDNEXT)")
             messages = 0
@@ -113,7 +109,6 @@ def imap_polling_watcher():
 
             if status == "OK" and data[0]:
                 text = safe_decode(data[0])
-                # Parse: INBOX (MESSAGES 5 UIDNEXT 123)
                 m = re.search(r'MESSAGES\s+(\d+)', text)
                 if m:
                     messages = int(m.group(1))
@@ -130,7 +125,6 @@ def imap_polling_watcher():
                 imap.select('"INBOX"', readonly=False)
                 current_emails = fetch_folder_emails(imap, "INBOX")
 
-                # Auto-move every NEW email to Phishing folder
                 old_uids = {e["uid"] for e in latest_emails["inbox"]}
 
                 latest_emails["inbox"] = fetch_folder_emails(imap, "INBOX")
@@ -151,13 +145,12 @@ def imap_polling_watcher():
                             sender_name = match.group(1).strip().replace('"', '')
                             sender_email = match.group(2).strip()
                         else:
-                            # No name, just email
                             sender_email = raw_from.strip()
-                            # Try to extract email with <>
                             email_match = re.search(r'<([^>]+)>', raw_from)
+
                             if email_match:
                                 sender_email = email_match.group(1)
-                            # Clean up encoded names like =?utf-8?q?John_Doe?=
+
                             sender_name = re.sub(r'=\?.*?\?=','', raw_from).strip()
                             if not sender_name or sender_name == sender_email:
                                 sender_name = sender_email.split('@')[0].replace('.', ' ').title()

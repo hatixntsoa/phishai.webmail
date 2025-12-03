@@ -1,14 +1,11 @@
 import imaplib
 
+from utils.helpers import detect_sent_folder, detect_trash_folder
+from core.state import latest_emails, new_mail_event
+from utils.helpers import detect_trash_folder
 from email.utils import parsedate_to_datetime
 
 from config import IMAP_HOST, IMAP_PORT, IMAP_USER, IMAP_PASS
-
-from core.state import latest_emails, new_mail_event
-
-from utils.helpers import detect_trash_folder
-from utils.helpers import detect_sent_folder, detect_trash_folder
-
 
 def move_msg(imap, msg_uid, src_folder, dst_folder):
     try:
@@ -23,10 +20,10 @@ def move_msg(imap, msg_uid, src_folder, dst_folder):
 
         # Mark as Deleted using UID
         imap.uid('STORE', msg_uid, '+FLAGS', '\\Deleted')
-        
+
         # Expunge using UID command (some servers require it)
         imap.expunge()
-        
+
         print(f"[MOVE SUCCESS] UID {msg_uid} moved from {src_folder} → {dst_folder}")
         return True
 
