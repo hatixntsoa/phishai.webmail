@@ -1,10 +1,17 @@
+# Frontend
 Flask
-python-dotenv
+
+# Backend
+beautifulsoup4
 requests
 fastapi
 uvicorn
-pydantic
+
+# Environment variables
+python-dotenv
+
+# Ollama
 ollama
-python-multipart
-email-validator
-rapidfuzz
+
+# Gemini
+google-genai
