@@ -339,5 +339,74 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         } catch (err) {}
     });
+    evtSource.addEventListener("switch_to_phishing", () => {
+        const phishingLink = Array.from(sidebarLinks).find(l =>
+            l.querySelector('span')?.textContent.toLowerCase() === 'phishing'
+        );
+        if (phishingLink) phishingLink.click();
+    });
+
+    evtSource.addEventListener("phishing_alert", e => {
+        const a = JSON.parse(e.data);
+
+        // Remove any existing banner
+        document.getElementById("phish-banner")?.remove();
+
+        const banner = document.createElement("div");
+        banner.id = "phish-banner";
+
+        // Build bullet points
+        const reasonItems = a.reasons.map(r => 
+            `<li style="margin: 6px 0; padding-left: 4px;">• ${escapeHtml(r)}</li>`
+        ).join("");
+
+        banner.innerHTML = `
+            <div style="max-width: 700px; margin: 0 auto; text-align: left; line-height: 1.5;">
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 19px; font-weight: bold; margin-bottom: 8px;">
+                    <span style="font-size: 28px;">Phishing Email Blocked</span>
+                    <span style="background: #ff1744; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">
+                        ${a.confidence} Confidence
+                    </span>
+                </div>
+                <div style="opacity: 0.95; margin-bottom: 8px;">
+                    From: <strong>${escapeHtml(a.sender)}</strong> &lt;${escapeHtml(a.sender_email)}&gt;
+                </div>
+                <div style="font-style: italic; opacity: 0.9; margin-bottom: 14px; color: #ffcccc;">
+                    “${escapeHtml(a.subject)}”
+                </div>
+                <div style="background: rgba(255,255,255,0.12); border-left: 4px solid #ff1744; padding: 12px; border-radius: 0 6px 6px 0; font-size: 14px;">
+                    <strong>Why PhishAI blocked this email:</strong>
+                    <ul style="margin: 10px 0 0 0; padding-left: 22px; list-style: none;">
+                        ${reasonItems}
+                    </ul>
+                </div>
+            </div>
+        `;
+
+        Object.assign(banner.style, {
+            position: "fixed",
+            top: "0",
+            left: "0",
+            right: "0",
+            background: "linear-gradient(135deg, #c62828 0%, #d32f2f 50%, #b71c1c 100%)",
+            color: "white",
+            padding: "20px 24px",
+            fontFamily: "'Roboto', sans-serif",
+            zIndex: "9999",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+            borderBottom: "5px solid #ff1744",
+            animation: "slideDown 0.5s cubic-bezier(0.22, 0.61, 0.36, 1)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)"
+        });
+
+        document.body.appendChild(banner);
+
+        setTimeout(() => {
+            banner.style.animation = "slideUp 0.6s ease forwards";
+            setTimeout(() => banner.remove(), 600);
+        }, 9000);
+    });
+
     evtSource.onerror = () => console.warn("SSE disconnected");
 });

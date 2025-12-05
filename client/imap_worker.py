@@ -207,6 +207,28 @@ def imap_polling_watcher():
                         if is_phishing:
                             move_msg(imap, uid, "INBOX", "Phishing")
                             print(f" → MOVED TO PHISHING FOLDER")
+
+                            # Refresh phishing folder in memory
+                            latest_emails["phishing"] = fetch_folder_emails(imap, "Phishing")
+
+                            # TRIGGER INSTANT UI: switch to phishing tab + show red alert
+                            from core.sse import broadcast
+                            import json
+
+                            # Auto-switch to Phishing tab
+                            broadcast("switch_to_phishing", json.dumps({"go": True}))
+
+                            # Send rich notification with real AI reasons
+                            broadcast("phishing_alert", json.dumps({
+                                "title": "Phishing Email Blocked!",
+                                "sender": sender_name,
+                                "sender_email": sender_email,
+                                "subject": subject,
+                                "confidence": verdict_dict.get("confidence", "high").title(),
+                                "reasons": verdict_dict.get("reasons", ["Suspicious content detected"])
+                            }))
+
+                            new_mail_event.set()
                         else:
                             print(f" → Legitimate email — kept in Inbox")
 

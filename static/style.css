@@ -28,7 +28,7 @@
     --header-background: #ffffff;
     --header-border-color: #e0e0e0;
     --email-item-border-color: #343140;
-    --unread-email-background: #15191f;
+    --unread-email-background: #000000;
     --email-item-hover-background: var(--sidebar-active-background);
     --text-color: #212121;
     --primary-color: #235ccf;
@@ -578,4 +578,13 @@ body {
 }
 .email-list-header {
     flex-shrink: 0;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideUp {
+    to { transform: translateY(-100%); opacity: 0; }
 }
