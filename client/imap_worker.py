@@ -150,27 +150,45 @@ def imap_polling_watcher():
 
                             if email_match:
                                 sender_email = email_match.group(1)
-
                             sender_name = re.sub(r'=\?.*?\?=','', raw_from).strip()
                             if not sender_name or sender_name == sender_email:
                                 sender_name = sender_email.split('@')[0].replace('.', ' ').title()
+
+                        raw_to = email.get("to", "")                                   # ← same as "from"
+
+                        match = re.search(r'([^<]+?)\s*<([^>]+)>', raw_to)
+                        if match:
+                            recipient_name = match.group(1).strip().replace('"', '')
+                            recipient_email = match.group(2).strip()
+                        else:
+                            recipient_email = raw_to.strip()
+                            email_match = re.search(r'<([^>]+)>', raw_to)
+                            if email_match:
+                                recipient_email = email_match.group(1)
+                            recipient_name = re.sub(r'=\?.*?\?=','', raw_to).strip()
+                            if not recipient_name or recipient_name == recipient_email:
+                                recipient_name = recipient_email.split('@')[0].replace('.', ' ').title() if '@' in recipient_email else "Unknown"
 
                         subject = email.get("subject", "(no subject)")
                         body = email.get("body", "") or email.get("text", "") or email.get("html", "")
                         body_preview = (body or "(no body)").replace("\n", " ")
 
                         print("New email")
-                        print(f"Sender Name : {sender_name}")
-                        print(f"Sender Email: {sender_email}")
-                        print(f"Subject     : {subject}")
-                        print(f"Body preview: {body_preview}")
-                        print(f"UID         : {uid}\n")
+                        print(f"Sender Name     : {sender_name}")
+                        print(f"Sender Email    : {sender_email}")
+                        print(f"Recipient Name  : {recipient_name}")
+                        print(f"Recipient Email : {recipient_email}")
+                        print(f"Subject         : {subject}")
+                        print(f"Body preview    : {body_preview}")
+                        print(f"UID             : {uid}\n")
 
                         att_names = [att["name"] for att in email.get("attachments", [])]
                         emails_for_ai = []
                         emails_for_ai.append({
                             "sender_name": sender_name,
                             "sender_email": sender_email,
+                            "recipient_name": recipient_name,
+                            "recipient_email": recipient_email,
                             "subject": subject,
                             "body": body,
                             "attachment_filenames": att_names or None
