@@ -154,7 +154,7 @@ def imap_polling_watcher():
                             if not sender_name or sender_name == sender_email:
                                 sender_name = sender_email.split('@')[0].replace('.', ' ').title()
 
-                        raw_to = email.get("to", "")                                   # ← same as "from"
+                        raw_to = email.get("to", "")
 
                         match = re.search(r'([^<]+?)\s*<([^>]+)>', raw_to)
                         if match:

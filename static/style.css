@@ -119,22 +119,20 @@ body {
     font-size: 1.5em;
     font-weight: bold;
     color: var(--sidebar-text-color);
-    /* margin: 0 auto; */
 }
 
 .sidebar-header .logo {
     display: flex;
     align-items: center;
-    gap: 12px;                    /* space between image and text */
-    /* padding: 16px 20px; */
+    gap: 12px;
     font-weight: 700;
     font-size: 1.4rem;
 }
 
 .sidebar-header .logo-img {
-    width: 40px;                  /* adjust size as needed */
+    width: 40px;
     height: 40px;
-    border-radius: 8px;           /* optional: rounded corners */
+    border-radius: 8px;
     object-fit: contain;
 }
 
@@ -162,28 +160,27 @@ body {
     padding: 0;
     margin: 0;
     flex-grow: 1;
-    position: relative; /* Positioning context for the indicator */
+    position: relative;
 }
 
 .active-indicator {
     position: absolute;
     left: 5px;
-    width: 5px; /* Increased thickness */
+    width: 5px;
     background-color: var(--primary-color);
     border-radius: 3px;
-    transition: top 0.3s ease, height 0.3s ease; /* Animation */
+    transition: top 0.3s ease, height 0.3s ease;
 }
 
 .sidebar-menu li {
     margin-bottom: 5px;
-    /* Removed position: relative; */
 }
 
 .sidebar-menu li a {
     display: flex;
     align-items: center;
-    padding: 10px 15px 10px 20px; /* Increased left padding to create gap */
-    margin: 0 10px 0 15px; /* Adjust margin to account for the line outside */
+    padding: 10px 15px 10px 20px;
+    margin: 0 10px 0 15px;
     border-radius: 5px;
     text-decoration: none;
     color: var(--sidebar-text-color);
@@ -213,7 +210,7 @@ body {
 .header {
     display: flex;
     align-items: center;
-    padding: 10px 10px; /* Reduced left padding */
+    padding: 10px 10px;
     background: var(--background-color);
     border-bottom: 1px solid var(--email-item-border-color);
 }
@@ -248,9 +245,9 @@ body {
     background: var(--sidebar-active-background);
     border-radius: 8px;
     padding: 5px 10px;
-    flex-grow: 1; /* Allow the search bar to grow */
+    flex-grow: 1;
     max-height: 45px;
-    max-width: 350px; /* Set the desired max-width */
+    max-width: 350px;
 }
 
 .search-bar i {
@@ -263,18 +260,18 @@ body {
     outline: none;
     width: 100%;
     margin-left: 10px;
-    color: var(--muted); /* Default text color */
+    color: var(--muted);
 }
 
 .search-bar input:focus {
-    color: var(--sidebar-text-color); /* White text color on focus */
+    color: var(--sidebar-text-color);
 }
 
 .user-menu {
     margin-left: auto;
     display: flex;
     align-items: center;
-    gap: 10px; /* Space between icons */
+    gap: 10px;
 }
 
 .user-menu a {
@@ -285,8 +282,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    text-decoration: none; /* Remove underline */
-    /* Removed margin-left: 10px; */
+    text-decoration: none;
 }
 
 .user-menu a i {
@@ -300,7 +296,6 @@ body {
 .email-list {
     flex: 1;
     overflow-y: auto;
-    /* flex-grow: 1; */
     width: 100%;
 }
 
@@ -332,10 +327,7 @@ body {
     position: relative;
 }
 
-/* This is the magic: bottom shadow on hover */
 .email-item:hover {
-    /* box-shadow: 0 8px 16px #235ccf; */
-    /* box-shadow: 0px 6px 19px 12px rgba(0,0,0,0.21); */
     background-color: var(--sidebar-active-background) !important;
     position: relative;
 }
@@ -376,7 +368,7 @@ body {
 }
 
 .email-sender {
-    font-weight: normal; /* Default to normal */
+    font-weight: normal;
     flex: 1;
     white-space: nowrap;
     overflow: hidden;
@@ -409,10 +401,10 @@ body {
 .email-sender,
 .email-subject,
 .email-preview {
-    white-space: nowrap;           /* prevents wrapping */
-    overflow: hidden;              /* hides overflow */
-    text-overflow: ellipsis;       /* adds "..." */
-    max-width: 100%;               /* important for flex/grid */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .email-actions {
@@ -457,10 +449,10 @@ body {
     font-size: 1.2em;
     font-weight: bold;
     margin: 0;
-    white-space: nowrap;           /* prevents wrapping */
-    overflow: hidden;              /* hides overflow */
-    text-overflow: ellipsis;       /* adds "..." */
-    max-width: 100%; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
 }
 
 .email-details .email-sender {
@@ -482,9 +474,6 @@ body {
     padding: 20px;
 }
 
-/* Removed body.dark-mode: dark variables moved to :root and light values to .light-mode */
-
-/* Compose Window Styles */
 .compose-backdrop {
     position: fixed;
     top: 0;
@@ -522,7 +511,7 @@ body {
     border-radius: 8px 8px 0 0;
     color: var(--sidebar-text-color);
     font-weight: bold;
-    cursor: move; /* Add move cursor for dragging */
+    cursor: move;
 }
 
 .close-compose-btn {
@@ -588,5 +577,5 @@ body {
     overflow-y: auto;
 }
 .email-list-header {
-    flex-shrink: 0;          /* ← ADD THIS LINE */
+    flex-shrink: 0;
 }

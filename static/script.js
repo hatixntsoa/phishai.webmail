@@ -10,7 +10,7 @@ let lastEmailCount = { inbox: 0, sent: 0 };
 // ———————————————————————————————
 document.addEventListener('DOMContentLoaded', function () {
     const emailList = document.querySelector('.email-list');
-    const emailListBody = document.querySelector('.email-list-body'); // ← scrollable part
+    const emailListBody = document.querySelector('.email-list-body');
     const emailListHeader = document.querySelector('.email-list-header');
     const folderNameEl = document.querySelector('.email-list-header .folder-name');
     const emailCountEl = document.querySelector('.email-list-header .email-count');
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // ———————————————————————————————
-    // RENDER EMAIL LIST — FIXED VERSION
+    // RENDER EMAIL LIST
     // ———————————————————————————————
     window.renderEmailList = function (folder = 'inbox') {
         const data = emails[folder] || [];
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 showEmail(email);
             });
 
-            emailListBody.appendChild(item); // ← append to body only
+            emailListBody.appendChild(item);
         });
     };
 
