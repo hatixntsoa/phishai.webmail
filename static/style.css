@@ -1,18 +1,45 @@
 :root {
-    --background-color: #000;
-    --sidebar-background: #010409;
-    --sidebar-text-color: #ffffff;
-    --sidebar-active-background: #15191f;
+    --background-color: #ffffff;
+    --sidebar-background: #ffffff;
+    --sidebar-text-color: #212121;
+    --sidebar-active-background: #f1f3f5;
     --header-background: #ffffff;
     --header-border-color: #e0e0e0;
-    --email-item-border-color: #343140;
-    --unread-email-background: #15191f;
+    --email-item-border-color: #eaeaea;
+    --unread-email-background: #ffffff;
     --email-item-hover-background: var(--sidebar-active-background);
     --text-color: #212121;
+    --primary-color: #235ccf;
+    --scroll-bg: #f4f4f4;
+    --scroll-handle: #cccccc;
+    --handle-hover: #b3b3b3;
+    --muted: #616161;
+    --muted-2: #9e9e9e;
+    --muted-3: #9e9e9e;
+    --sender-initial-bg: #e0e0e0;
+    --white: #ffffff;
+}
+
+.dark-mode {
+    --background-color: #121212;
+    --sidebar-background: #1f1f1f;
+    --sidebar-text-color: #ffffff;
+    --sidebar-active-background: #3a3a3a;
+    --header-background: #1f1f1f;
+    --header-border-color: #3a3a3a;
+    --email-item-border-color: #3a3a3a;
+    --unread-email-background: #15191f;
+    --email-item-hover-background: var(--sidebar-active-background);
+    --text-color: #ffffff;
     --primary-color: #235ccf;
     --scroll-bg: #2c2c2c;
     --scroll-handle: #555;
     --handle-hover: #777;
+    --muted: #9198a1;
+    --muted-2: #9e9e9e;
+    --muted-3: #616161;
+    --sender-initial-bg: #262c36;
+    --white: #ffffff;
 }
 
 ::-webkit-scrollbar {
@@ -91,7 +118,7 @@ body {
     text-align: left;
     font-size: 1.5em;
     font-weight: bold;
-    color: #fff;
+    color: var(--sidebar-text-color);
     /* margin: 0 auto; */
 }
 
@@ -127,7 +154,7 @@ body {
 
 .btn-primary {
     background-color: var(--primary-color);
-    color: #fff;
+    color: var(--white);
 }
 
 .sidebar-menu {
@@ -204,7 +231,7 @@ body {
 }
 
 .back-button i {
-    color: #9198a1;
+    color: var(--muted);
     font-size: 20px;
     display: flex;
     align-items: center;
@@ -212,13 +239,13 @@ body {
 }
 
 .back-button:hover {
-    background-color: #15191f;
+    background-color: var(--sidebar-active-background);
 }
 
 .search-bar {
     display: flex;
     align-items: center;
-    background: #15191f;
+    background: var(--sidebar-active-background);
     border-radius: 8px;
     padding: 5px 10px;
     flex-grow: 1; /* Allow the search bar to grow */
@@ -227,7 +254,7 @@ body {
 }
 
 .search-bar i {
-    color: #9e9e9e;
+    color: var(--muted-2);
 }
 
 .search-bar input {
@@ -236,11 +263,11 @@ body {
     outline: none;
     width: 100%;
     margin-left: 10px;
-    color: #9198a1; /* Default text color */
+    color: var(--muted); /* Default text color */
 }
 
 .search-bar input:focus {
-    color: #ffffff; /* White text color on focus */
+    color: var(--sidebar-text-color); /* White text color on focus */
 }
 
 .user-menu {
@@ -251,7 +278,7 @@ body {
 }
 
 .user-menu a {
-    color: #9198a1;
+    color: var(--muted);
     width: 45px;
     height: 45px;
     border-radius: 12px;
@@ -267,7 +294,7 @@ body {
 }
 
 .user-menu a:hover {
-    background-color: #15191f;
+    background-color: var(--sidebar-active-background);
 }
 
 .email-list {
@@ -293,7 +320,7 @@ body {
 
 .email-count {
     font-size: 0.8em;
-    color: #616161;
+    color: var(--muted-3);
 }
 
 .email-item {
@@ -309,7 +336,7 @@ body {
 .email-item:hover {
     /* box-shadow: 0 8px 16px #235ccf; */
     /* box-shadow: 0px 6px 19px 12px rgba(0,0,0,0.21); */
-    background-color: #15191f;
+    background-color: var(--sidebar-active-background) !important;
     position: relative;
 }
 
@@ -318,7 +345,7 @@ body {
     right: 20px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9198a1;
+    color: var(--muted);
     font-size: 14px;
 }
 
@@ -332,17 +359,14 @@ body {
 
 
 .email-item.unread {
-    /* background-color: var(--unread-email-background); */
-}
-
-.email-item:hover {
+    background-color: var(--unread-email-background);
 }
 
 .email-sender-initial {
     width: 24px;
     height: 24px;
     border-radius: 8px;
-    background-color: #262c36;
+    background-color: var(--sender-initial-bg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -375,7 +399,7 @@ body {
 
 .email-preview {
     flex: 1;
-    color: #616161;
+    color: var(--muted-3);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -404,7 +428,7 @@ body {
     cursor: pointer;
     visibility: hidden;
     font-size: 20px;
-    color: #9198a1;
+    color: var(--muted);
 }
 
 .email-item:hover .email-actions i {
@@ -441,7 +465,7 @@ body {
 
 .email-details .email-sender {
     font-size: 0.9em;
-    color: #9198a1;
+    color: var(--muted);
 }
 
 .email-content {
@@ -458,16 +482,7 @@ body {
     padding: 20px;
 }
 
-body.dark-mode {
-    --background-color: #121212;
-    --sidebar-background: #1f1f1f;
-    --sidebar-text-color: #ffffff;
-    --sidebar-active-background: #3a3a3a;
-    --header-background: #1f1f1f;
-    --header-border-color: #3a3a3a;
-    --email-item-border-color: #3a3a3a;
-    --text-color: #ffffff;
-}
+/* Removed body.dark-mode: dark variables moved to :root and light values to .light-mode */
 
 /* Compose Window Styles */
 .compose-backdrop {
@@ -503,7 +518,7 @@ body.dark-mode {
     justify-content: space-between;
     align-items: center;
     padding: 10px 15px;
-    background-color: #15191f;
+    background-color: var(--sidebar-active-background);
     border-radius: 8px 8px 0 0;
     color: var(--sidebar-text-color);
     font-weight: bold;
