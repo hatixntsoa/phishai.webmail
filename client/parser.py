@@ -1,4 +1,4 @@
-from email.utils import parsedate_to_datetime
+from email.utils import parsedate_to_datetime, getaddresses
 from email.policy import default
 
 import email
@@ -25,9 +25,23 @@ def parse_email(raw_msg):
         match = re.search(r'[\w\.-]+@[\w\.-]+', sender)
         sender_name = match.group(0) if match else sender
 
+    # Parse the first recipient from the To header (name and email)
+    to_header = msg.get("To") or ""
+    recipient_name = ""
+    recipient_email = ""
+    if to_header:
+        addrs = getaddresses([to_header])
+        if addrs:
+            name, addr = addrs[0]
+            recipient_name = name.strip() or (addr or "")
+            recipient_email = addr or ""
+
     return {
         "id": str(int(time.time() * 1000)) + str(hash(subject + body) % 1000),
         "sender": sender_name,
+        "to": to_header,
+        "recipient_name": recipient_name,
+        "recipient_email": recipient_email,
         "subject": subject,
         "body": body,
         "date": date,
